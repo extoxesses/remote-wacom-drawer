@@ -1,5 +1,4 @@
-import pyautogui
-from pyautogui import click, moveTo, size
+from pyautogui import mouseUp, mouseDown, moveTo, size
 
 from app import logging, SERVER
 from commons.events import DrawerEvent, CalibrationEvent
@@ -8,6 +7,8 @@ class WebsocketService :
     _instance = None
     logger = logging.getLogger(__name__)
     scale_factor = { 'x': 1.0, 'y': 1.0 }
+    last_button = 0
+    last_button_name = None
 
     def __init__(self) :
         if WebsocketService._instance is not None:
@@ -31,6 +32,14 @@ class WebsocketService :
         rescaled_x = self.rescale_point(event.point.x, 'x')
         rescaled_y = self.rescale_point(event.point.y, 'y')
         moveTo(rescaled_x, rescaled_y)
+
+        if event.point.button != self.last_button:
+            if event.point.button == 0:
+                mouseDown(button=self.last_button_name)
+            if event.point.button == 1:
+                mouseUp(button='left')
+            elif event.point.button == 2:
+                mouseUp(button='right')
 
         # Temo che per non fare casino, la cosa più bella sarebbe:
         #  - leggere i messaggi dal topic
@@ -73,7 +82,7 @@ class WebsocketService :
         #     click(button='right')
 
     def on_screen_calibration(self, event : CalibrationEvent) -> None :
-        screen_size = pyautogui.size()
+        screen_size = size()
         self.scale_factor['x'] = screen_size.width / event.screen_size.width
         self.scale_factor['y'] = screen_size.height / event.screen_size.height
 
