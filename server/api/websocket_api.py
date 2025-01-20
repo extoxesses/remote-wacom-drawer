@@ -1,7 +1,6 @@
-import logging
 from flask_socketio import send, emit
 
-from server import socketio
+from server import logging, socketio
 from server.service import websocketService
 from commons.events import DrawerEvent, CalibrationEvent
 from commons.topic import TOPIC_CONNECT, TOPIC_DISCONNECT, TOPIC_CLIENT_DISCONNECTING, TOPIC_POSITION, TOPIC_SCREEN_CALIBRATION

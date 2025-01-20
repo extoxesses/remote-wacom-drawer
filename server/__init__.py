@@ -8,7 +8,7 @@ from flask_socketio import SocketIO
 
 app = Flask(__name__, template_folder='../resources/templates', static_folder='../resources/static')
 CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*") # TODO: fix this
 
 load_dotenv()
 
