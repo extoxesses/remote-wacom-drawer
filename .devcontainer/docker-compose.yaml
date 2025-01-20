@@ -1,0 +1,10 @@
+version: '3.7'
+name: remote-wacom-drawer
+services:
+  drawer:
+    image: mcr.microsoft.com/devcontainers/python:1-3.12-bullseye
+    command: sleep infinity
+    volumes:
+      - ..:/workspace
+    ports:
+      - "5000:5000"

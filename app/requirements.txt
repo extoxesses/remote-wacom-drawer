@@ -1,0 +1,5 @@
+python-dotenv
+python-socketio
+pyautogui
+requests
+websocket-client

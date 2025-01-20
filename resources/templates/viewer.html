@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Viewer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.js"></script>
+    <script src="/static/js/utils.js"></script>
+    <script src="/static/js/viewer.js"></script>
+    <link rel="stylesheet" href="/static/css/base.css">
+</head>
+<body>
+    <h1>Viewer</h1>
+    <canvas id="displayCanvas" width="800" height="600"></canvas>
+    <script>
+        socket = io("ws://{{ip}}:{{port}}", {
+            reconnectionDelayMax: 10000,
+            auth: {
+                token: '1234'
+            }
+        });
+        configSocket(socket);
+        configViewer(socket, {{drawer_button}});
+    </script>
+</body>
+</html>
