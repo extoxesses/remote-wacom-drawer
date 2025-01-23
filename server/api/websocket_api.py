@@ -70,3 +70,8 @@ def handle_position(event : DrawerEvent) -> None :
 def handle_calibration(event : CalibrationEvent) -> None :
     logger.debug(f'[Event: screen/calibration] Incoming message {event}')
     websocketService.broadcast_on_room(TOPIC_SCREEN_CALIBRATION, event)
+
+@socketio.on('mouseclick') # TODO sistemare
+def handle_calibration(event) -> None :
+    logger.debug(f'[Event: mouseclick] Incoming message {event}')
+    websocketService.broadcast_on_room('mouseclick', event)

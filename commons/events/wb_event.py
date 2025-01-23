@@ -5,7 +5,6 @@ from dataclasses import dataclass
 class PointEvent :
     x : int
     y : int
-    button : int
 
     @classmethod
     def from_dict(cls, data : dict) -> 'PointEvent':

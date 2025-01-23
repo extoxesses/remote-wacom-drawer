@@ -39,3 +39,42 @@ function getRelativeMousePosition(x, y, canvas) {
         offsetY: y * (canvas.height / rect.height)
     };
 }
+
+// -- Topics ---
+
+const CALIBRATION_TOPIC = 'screen/calibration';
+const CLIENT_DISCONNECTING_TOPIC = 'client_disconnecting';
+const POSITION_TOPIC = 'position';
+
+function emitPositionEvent(socket, event, client, isStart = false) {
+    socket.emit(POSITION_TOPIC, positionEvent(client, event));
+}
+
+// --- Models ---
+
+function baseEvent(client) {
+    return {
+        client,
+        timestamp: Date.now()
+    };
+}
+
+function positionEvent(client, event) {
+    return {
+        ...baseEvent(client),
+        point: {
+            x: event.offsetX,
+            y: event.offsetY
+        }
+    };
+}
+
+function screenCalibrationEvent(client, canvas) {
+    return {
+        ...baseEvent(client),
+        screen_size: {
+            width: canvas.width,
+            height: canvas.height
+        }
+    };
+}
