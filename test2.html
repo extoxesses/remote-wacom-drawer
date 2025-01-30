@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notion-like Canvas with Blackboard Mode</title>
+    <style>
+        /* Global Styles */
+        body {
+            margin: 0;
+            height: 100vh;
+            background-color: #f7f7f7; /* Light gray background */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333; /* Dark gray text */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Container Styles */
+        #container {
+            display: flex;
+            width: 100%; /* Full width */
+            height: 100vh; /* Full height */
+            background-color: #fff; /* White background */
+            border-radius: 12px; /* Rounded corners */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+            overflow: hidden; /* Prevent overflow */
+        }
+
+        /* Sidebar Styles */
+        #sidebar {
+            width: 220px; /* Fixed width for the sidebar */
+            padding: 16px;
+            background-color: #fafafa; /* Light gray background */
+            border-right: 1px solid #e0e0e0; /* Light gray border */
+        }
+
+        #sidebar h1 {
+            margin-top: 0;
+            font-size: 20px;
+            font-weight: 600; /* Semi-bold */
+            color: #333; /* Dark gray text */
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #sidebar button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            font-size: 14px;
+            font-weight: 500; /* Medium weight */
+            color: #333; /* Dark gray text */
+            background-color: #fff; /* White background */
+            border: 1px solid #e0e0e0; /* Light gray border */
+            border-radius: 6px; /* Rounded corners */
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        #sidebar button:hover {
+            background-color: #f0f0f0; /* Light gray hover */
+            border-color: #ccc; /* Slightly darker border on hover */
+        }
+
+        /* Switch Styles */
+        .switch-container {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 20px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #4CAF50; /* Green background when checked */
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Canvas Container Styles */
+        #canvasContainer {
+            flex: 1; /* Take remaining space */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #fff; /* White background */
+        }
+
+        #myCanvas {
+            border: 1px solid #e0e0e0; /* Light gray border */
+            background-color: #fff; /* White background */
+            border-radius: 8px; /* Rounded corners */
+            width: 100%; /* Full width of container */
+            height: 100%; /* Full height of container */
+            cursor: crosshair; /* Show drawing cursor */
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <!-- Sidebar -->
+        <div id="sidebar">
+            <h1>Canvas Controls</h1>
+            <button id="connectButton">Connect</button>
+            <button id="calibrateButton">Calibrate</button>
+            <button id="cleanButton">Clean</button>
+            <div class="switch-container">
+                <label for="blackboardModeSwitch">Blackboard Mode</label>
+                <label class="switch">
+                    <input type="checkbox" id="blackboardModeSwitch">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Canvas Container -->
+        <div id="canvasContainer">
+            <canvas id="myCanvas"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // Get the canvas element and its context
+        const canvas = document.getElementById('myCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Variables for drawing
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+        let cursorX = 0;
+        let cursorY = 0;
+        let shadowTimeout = null;
+
+        // Function to resize the canvas to fit the available space
+        // function resizeCanvas() {
+        //     const container = document.getElementById('canvasContainer');
+        //     const containerWidth = container.clientWidth;
+        //     const containerHeight = container.clientHeight;
+        // 
+        //     // Set canvas dimensions to fit the container
+        //     canvas.width = containerWidth;
+        //     canvas.height = containerHeight;
+        // 
+        //     // Redraw content after resizing
+        //     drawInitialContent();
+        // }
+        //
+        // Function to draw initial content (rectangle, circle, and text)
+        // function drawInitialContent() {
+        //     // Clear the canvas
+        //     ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // 
+        //     // Draw a rectangle
+        //     ctx.fillStyle = '#4CAF50'; // Set the fill color to green
+        //     ctx.fillRect(canvas.width * 0.1, canvas.height * 0.1, canvas.width * 0.8, canvas.height * 0.8); // Draw a rectangle
+        // 
+        //     // Draw a circle
+        //     ctx.beginPath();
+        //     ctx.arc(canvas.width / 2, canvas.height / 2, Math.min(canvas.width, canvas.height) * 0.2, 0, 2 * Math.PI); // Draw a circle
+        //     ctx.fillStyle = '#FF5722'; // Set the fill color to orange
+        //     ctx.fill();
+        //     ctx.strokeStyle = '#333'; // Set the stroke color to dark gray
+        //     ctx.stroke();
+        // 
+        //     // Draw some text
+        //     ctx.font = `${Math.min(canvas.width, canvas.height) * 0.1}px Arial`; // Responsive font size
+        //     ctx.fillStyle = '#333'; // Set the text color to dark gray
+        //     ctx.textAlign = 'center';
+        //     ctx.fillText('Hello, Canvas!', canvas.width / 2, canvas.height * 0.9); // Draw text
+        // }
+
+        // Function to draw a shadow at the cursor position
+        function drawShadow() {
+            if (!blackboardModeSwitch.checked) {
+                // Clear the canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Redraw the initial content
+                drawInitialContent();
+
+                // Draw a shadow at the cursor position
+                ctx.beginPath();
+                ctx.arc(cursorX, cursorY, 10, 0, 2 * Math.PI); // Draw a circle
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'; // Semi-transparent black
+                ctx.fill();
+            }
+        }
+
+        // Function to start drawing
+        function startDrawing(e) {
+            if (blackboardModeSwitch.checked) {
+                isDrawing = true;
+                [lastX, lastY] = [e.offsetX, e.offsetY];
+            }
+        }
+
+        // Function to draw on the canvas
+        function draw(e) {
+            cursorX = e.offsetX;
+            cursorY = e.offsetY;
+
+            if (blackboardModeSwitch.checked && isDrawing) {
+                // Draw a line from the last position to the current position
+                ctx.strokeStyle = '#000'; // Black color for drawing
+                ctx.lineWidth = 2; // Line thickness
+                ctx.lineCap = 'round'; // Rounded line ends
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(e.offsetX, e.offsetY);
+                ctx.stroke();
+
+                // Update the last position
+                [lastX, lastY] = [e.offsetX, e.offsetY];
+            } else if (!blackboardModeSwitch.checked) {
+                // Draw a shadow at the cursor position
+                drawShadow();
+            }
+        }
+
+        // Function to stop drawing
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        // Function to clear the shadow after a delay
+        function clearShadow() {
+            if (!blackboardModeSwitch.checked) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawInitialContent();
+            }
+        }
+
+        // Initial resize and draw
+        // resizeCanvas();
+
+        // Add event listeners for canvas drawing
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', () => {
+            stopDrawing();
+            clearShadow();
+        });
+
+        // Add event listener for window resize
+        // window.addEventListener('resize', resizeCanvas);
+
+        // Add event listeners for buttons
+        document.getElementById('connectButton').addEventListener('click', () => {
+            alert('Connect button clicked!');
+        });
+
+        document.getElementById('calibrateButton').addEventListener('click', () => {
+            alert('Calibrate button clicked!');
+        });
+
+        document.getElementById('cleanButton').addEventListener('click', () => {
+            // Clear the canvas and redraw the initial content
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawInitialContent();
+        });
+
+        const blackboardModeSwitch = document.getElementById('blackboardModeSwitch');
+        blackboardModeSwitch.addEventListener('change', (event) => {
+            if (event.target.checked) {
+                alert('Blackboard Mode enabled!');
+            } else {
+                alert('Blackboard Mode disabled!');
+                // Clear the shadow when switching modes
+                clearShadow();
+            }
+        });
+    </script>
+</body>
+</html>

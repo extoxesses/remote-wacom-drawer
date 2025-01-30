@@ -11,7 +11,8 @@ logger = logging.getLogger(__name__)
 
 # App global state
 load_dotenv()
-SERVER = f"ws://{os.getenv('HOST_IP', 'localhost')}:{os.getenv('HOST_PORT', '5000')}"
+# SERVER = f"ws://{os.getenv('HOST_IP', 'localhost')}:{os.getenv('HOST_PORT', '5000')}"
+SERVER = "ws://192.168.178.83:5000"
 DEBUG = os.getenv('DEBUG', 'False')
 
 sio = socketio.Client()

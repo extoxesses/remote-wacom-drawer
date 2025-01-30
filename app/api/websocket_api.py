@@ -1,9 +1,7 @@
 from app import sio, logging
 from app import websocketService
-from commons.topic import TOPIC_POSITION, TOPIC_SCREEN_CALIBRATION
-from commons.events import DrawerEvent, CalibrationEvent
-
-from pyautogui import mouseDown, mouseUp
+from commons.topic import TOPIC_MOUSE_CLICK, TOPIC_MOUSE_MOVE, TOPIC_SCREEN_CALIBRATION
+from commons.events import DrawerEvent, CalibrationEvent, MouseClickEvent
 
 logger = logging.getLogger(__name__)
 
@@ -16,24 +14,18 @@ def connect():
 def disconnect():
     websocketService.on_disconnect()
 
-@sio.on(TOPIC_POSITION)
+@sio.on(TOPIC_MOUSE_MOVE)
 def position(event):
-    # print(event)
     drawerEvent = DrawerEvent.from_dict(event)
-    websocketService.on_position(drawerEvent)
+    websocketService.on_mouse_move(drawerEvent)
 
 @sio.on(TOPIC_SCREEN_CALIBRATION)
 def screen_calibration(event):
+    print(event)
     calibrationEvent = CalibrationEvent.from_dict(event)
     websocketService.on_screen_calibration(calibrationEvent)
 
-@sio.on('mouseclick')
+@sio.on(TOPIC_MOUSE_CLICK)
 def mouseclick(event):
-    print(event)
-    action = event['event']
-    button = event['button']
-
-    if (action == 'mousedown') :
-        mouseDown(button=button)
-    else :
-        mouseUp(button=button)
+    mouseClickEvent = MouseClickEvent.from_dict(event)
+    websocketService.on_mouse_click(mouseClickEvent)

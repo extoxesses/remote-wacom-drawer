@@ -1,9 +1,9 @@
-from flask_socketio import send, emit
+from flask_socketio import send
 
 from server import logging, socketio
 from server.service import websocketService
-from commons.events import DrawerEvent, CalibrationEvent
-from commons.topic import TOPIC_CONNECT, TOPIC_DISCONNECT, TOPIC_CLIENT_DISCONNECTING, TOPIC_POSITION, TOPIC_SCREEN_CALIBRATION
+from commons.events import DrawerEvent, MouseClickEvent, CalibrationEvent
+from commons.topic import TOPIC_CONNECT, TOPIC_DISCONNECT, TOPIC_CLIENT_DISCONNECTING, TOPIC_MOUSE_CLICK, TOPIC_MOUSE_MOVE, TOPIC_SCREEN_CALIBRATION
 
 logger = logging.getLogger(__name__)
 
@@ -60,18 +60,17 @@ def handle_message(msg) -> None :
     print('Message: ' + msg)
     send(msg, broadcast=True)
 
-
-@socketio.on(TOPIC_POSITION)
-def handle_position(event : DrawerEvent) -> None :
-    logger.debug(f'[Event: position] Incoming message {event}')
-    websocketService.broadcast_on_room(TOPIC_POSITION, event)
-
 @socketio.on(TOPIC_SCREEN_CALIBRATION)
 def handle_calibration(event : CalibrationEvent) -> None :
     logger.debug(f'[Event: screen/calibration] Incoming message {event}')
     websocketService.broadcast_on_room(TOPIC_SCREEN_CALIBRATION, event)
 
-@socketio.on('mouseclick') # TODO sistemare
-def handle_calibration(event) -> None :
-    logger.debug(f'[Event: mouseclick] Incoming message {event}')
-    websocketService.broadcast_on_room('mouseclick', event)
+@socketio.on(TOPIC_MOUSE_MOVE)
+def handle_position(event : DrawerEvent) -> None :
+    logger.debug(f'[Event: mouse/move] Incoming message {event}')
+    websocketService.broadcast_on_room(TOPIC_MOUSE_MOVE, event)
+
+@socketio.on(TOPIC_MOUSE_CLICK)
+def handle_calibration(event : MouseClickEvent) -> None :
+    logger.debug(f'[Event: mouse/click] Incoming message {event}')
+    websocketService.broadcast_on_room(TOPIC_MOUSE_CLICK, event)

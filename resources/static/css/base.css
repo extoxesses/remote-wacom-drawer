@@ -1,42 +1,133 @@
-/* body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background-color: #f5f6f7;
-    color: #2e2e2e;
+body {
     margin: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
     height: 100vh;
-}
-h1 {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-}
-#clearButton {
-    background-color: #ffffff;
-    border: 1px solid #d1d1d1;
-    border-radius: 4px;
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-    margin-bottom: 1rem;
-}
-#clearButton:hover {
-    background-color: #f0f0f0;
-}
-*/
-canvas {
-    border: 1px solid #d1d1d1;
-    /* width: 800px; */
-    /* height: 600px; */
-}
-/* .container {
-    border: 1px solid #d1d1d1;
-    margin: 10px;
-    flex: auto;
-    flex-direction: column;
+    background-color: #f7f7f7; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333; 
     display: flex;
-    flex-direction: column;
-    width: 90%;
-    height: 90%;
-} */
+    justify-content: center;
+    align-items: center;
+}
+
+#container {
+    display: flex;
+    width: 100%; 
+    height: 100vh; 
+    background-color: #fff; 
+    border-radius: 12px; 
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); 
+    overflow: hidden; 
+}
+
+#sidebar {
+    width: 220px; 
+    padding: 16px;
+    background-color: #fafafa; 
+    border-right: 1px solid #e0e0e0; 
+}
+
+#sidebar h1 {
+    margin-top: 0;
+    font-size: 20px;
+    font-weight: 600; 
+    color: #333; 
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#sidebar button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    font-size: 14px;
+    font-weight: 500; 
+    color: #333; 
+    background-color: #fff; 
+    border: 1px solid #e0e0e0; 
+    border-radius: 6px; 
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+#sidebar button:hover {
+    background-color: #f0f0f0; 
+    border-color: #ccc; 
+}
+
+.icon {
+    width: 16px;
+    height: 16px;
+    opacity: 0.8;
+}
+
+.switch-container {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 20px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #4CAF50; 
+}
+
+input:checked + .slider:before {
+    transform: translateX(20px);
+}
+
+#drawingCanvasContainer {
+    flex: 1; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff; 
+    padding: 10px;
+}
+
+#drawingCanvas {
+    touch-action: manipulation;
+    border: 3px solid #e0e0e0; 
+    background-color: #fff; 
+    border-radius: 8px; 
+    width: 100%; 
+    height: 100%; 
+    cursor: crosshair; 
+}

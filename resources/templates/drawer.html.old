@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Drawer</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.js"></script>
+        <script src="/static/js/utils.js"></script>
+        <script src="/static/js/drawer.js"></script>
+        <link rel="stylesheet" href="/static/css/base.css">
+    </head>
+    <body>
+        <div class="container">
+            <div class="flex-item">
+                <div class="title">Drawer</div>
+                <div class="button">
+                    <button id="clearButton">Clear</button>
+                </div>
+            </div>
+            <div class="flex-item">
+                <canvas id="drawingCanvas" width="1200" height="600"></canvas>
+            </div>
+        </div>
+        <script>
+            let serviceUrl = window.location.host;
+            fetch(`http://${serviceUrl}/api/v1/login`)
+                .then(response => {
+                    socket = io(`ws://${serviceUrl}`, {
+                        reconnectionDelayMax: 10000,
+                        auth: {
+                            token: '1234'
+                        }
+                    });
+                    baseSocketConfiguration(socket)
+                    configDrawerSocket(client, socket)
+                    startDrawer(socket, {{drawer_button}});
+                }).catch(function(err) {
+                    alert('Fetch Error :-S', err); // TODO: gestire errore
+                });
+            // Per documentazione: https://socket.io/docs/v4/client-api/
+        </script> 
+    </body>
+</html>
