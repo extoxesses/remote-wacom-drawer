@@ -1,0 +1,38 @@
+@startuml
+actor User as usr
+participant Drawer as drw
+participant Server as srv
+participant Viewer as vwr
+
+== Drawer ==
+usr -> srv: /api/v1/drawer
+activate usr
+' drw ->  srv: /api/v1/drawer
+    activate srv
+        srv ->  srv: - Create user\n- Generate a new session_id
+        srv ->  drw: 200 OK (page + ""session"")
+    deactivate srv
+
+    drw -> srv: ws://connect ""{ 'session_id': 'abcd-1234', 'role': 'drawer' }""
+    activate srv
+        srv -> redis: get ""session_id""
+        srv <-- redis: oggetto di sessione
+        srv -> srv: - Create a new room and join drawer to it
+        srv -> redis: set ""room_id"" in ""session_id""
+        return Server connected
+    deactivate srv
+usr <-- drw
+deactivate usr
+
+== Viewer ==
+vwr ->  srv: /api/v1/viewer
+vwr <-- srv: 200 OK
+activate vwr
+    vwr ->  srv: POST /api/v1/enroll\n{ 'api-key' : '1234', 'api-secret' : '1234', 'role': 'viewer' }
+    srv ->  drw: ws di get key
+    srv <-- drw: ws di get key
+    srv -> srv: - Match secret
+    vwr <-- srv: 200 OK { 'session_id': '1234' }
+deactivate vwr
+
+@enduml

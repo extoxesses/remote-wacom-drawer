@@ -1,10 +1,10 @@
-const RANDOM_USER_KEY = 'authorization';
+const SESSION_USER_KEY = 'authorization';
 
 function connectToServer() {
     let serviceUrl = window.location.host;
     return io(`ws://${serviceUrl}`, {
         reconnectionDelayMax: 5000,
-        auth: localStorage.getItem(RANDOM_USER_KEY)
+        auth: JSON.parse(localStorage.getItem(SESSION_USER_KEY))
     });
 }
 
@@ -49,7 +49,7 @@ function setSharedConfigurations() {
 function drawOnCanvas(context, pressedButton, drawerFunction, drawerButton, eraserButton) {
     // TODO: qua potrebbe essere interessante dare la possibilità di dare una palete di colori per la penna in modalità "lavagna"
     if (pressedButton > 0) {
-        if (pressedButton === drawerButton) {
+        if (pressedButton === drawerButton) { // TODO: ridisegnare questa parte per utilizzare una logica simile a quella alla MOUSE_BUTTON
             context.strokeStyle = 'black';
         } else if (pressedButton === eraserButton) {
             context.strokeStyle = 'white';
@@ -90,15 +90,15 @@ function emitMouseMoveEvent(socket, event) {
     socket.emit(MOUSE_MOVE_TOPIC, mouseMoveEvent(event));
 }
 
-function emitMouseClickEvent(socket, event, client) {
-    socket.emit(MOUSE_CLICK_TOPIC, mouseClickEvent(client, event));
+function emitMouseClickEvent(socket, event) {
+    socket.emit(MOUSE_CLICK_TOPIC, mouseClickEvent(event));
 }
 
 // --- Models ---
 
 function baseEvent() {
     return {
-        client: JSON.parse(localStorage.getItem(RANDOM_USER_KEY))['api-key'],
+        client: JSON.parse(localStorage.getItem(SESSION_USER_KEY))['api-key'],
         timestamp: Date.now()
     };
 }
@@ -113,9 +113,9 @@ function mouseMoveEvent(event) {
     };
 }
 
-function mouseClickEvent(client, event) {
+function mouseClickEvent(event) {
     return {
-        ...baseEvent(client),
+        ...baseEvent(),
         event: event.type,
         button: MOUSE_BUTTON[event.button] || 'primary'
     };

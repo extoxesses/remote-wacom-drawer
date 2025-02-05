@@ -1,0 +1,35 @@
+@startuml
+actor User as usr
+participant Drawer as drw
+participant Server as srv
+participant Viewer as vwr
+database    Redis  as rds
+
+usr -> srv: /api/v1/drawer\n""{ 'role': 'drawer' }""
+activate usr
+    activate srv
+        srv   -> srv: Generate random keys
+        srv   -> srv: Start a new session with data\n""{ 'api-key': '...', 'room_id': '...' }""
+        srv <--> rds: Store ""room:<api-key>"" with data\n""{ 'sid': '...' }""
+        srv <--> rds: Store session
+        srv  --> drw: ""200 OK""\n(UI + ""session"")
+    deactivate srv
+
+    drw -> srv: ws://connect\n""{ 'session_id': 'abcd-1234', 'role': 'drawer' }""
+    activate srv
+        srv <--> rds: Get session
+        srv  -> srv: Create a new room and join drawer to it
+        srv  -> rds: Store ""room_id"" with drawer ""SID""
+        srv  -> rds: Update session with ""room_id""
+        return Server connected
+    deactivate srv
+
+    drw -> srv: ws://screen/calibration\n""{}""
+    activate srv
+    deactivate srv
+
+usr <-- srv: Drawer started
+
+deactivate usr
+
+@enduml

@@ -24,30 +24,6 @@
      drawInitialContent();
  }
 
- // Function to draw initial content (rectangle, circle, and text)
- function drawInitialContent() {
-     // Clear the canvas
-     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-     // Draw a rectangle
-     ctx.fillStyle = '#4CAF50'; // Set the fill color to green
-     ctx.fillRect(canvas.width * 0.1, canvas.height * 0.1, canvas.width * 0.8, canvas.height * 0.8); // Draw a rectangle
-
-     // Draw a circle
-     ctx.beginPath();
-     ctx.arc(canvas.width / 2, canvas.height / 2, Math.min(canvas.width, canvas.height) * 0.2, 0, 2 * Math.PI); // Draw a circle
-     ctx.fillStyle = '#FF5722'; // Set the fill color to orange
-     ctx.fill();
-     ctx.strokeStyle = '#333'; // Set the stroke color to dark gray
-     ctx.stroke();
-
-     // Draw some text
-     ctx.font = `${Math.min(canvas.width, canvas.height) * 0.1}px Arial`; // Responsive font size
-     ctx.fillStyle = '#333'; // Set the text color to dark gray
-     ctx.textAlign = 'center';
-     ctx.fillText('Hello, Canvas!', canvas.width / 2, canvas.height * 0.9); // Draw text
- }
-
  // Function to draw a shadow at the cursor position
  function drawShadow() {
      if (!blackboardModeSwitch.checked) {

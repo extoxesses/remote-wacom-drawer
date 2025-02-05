@@ -1,4 +1,7 @@
-python-dotenv
 flask
 flask_cors
 flask_socketio
+flask_session
+python-dotenv
+pymongo
+redis

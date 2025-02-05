@@ -1,9 +1,10 @@
-from flask_socketio import send
-
 from server import logging, socketio
-from server.service import websocketService
+from server.service import websocket_service
 from commons.events import DrawerEvent, MouseClickEvent, CalibrationEvent
 from commons.topic import TOPIC_CONNECT, TOPIC_DISCONNECT, TOPIC_CLIENT_DISCONNECTING, TOPIC_MOUSE_CLICK, TOPIC_MOUSE_MOVE, TOPIC_SCREEN_CALIBRATION
+
+
+from server.models import EnrollRequest, EnrollRole
 
 logger = logging.getLogger(__name__)
 
@@ -13,12 +14,12 @@ logger = logging.getLogger(__name__)
 ###########################
 
 @socketio.on(TOPIC_CONNECT)
-def connect_handler(auth) -> None :
-    websocketService.on_connect(auth)
+def connect_handler(auth : EnrollRequest) -> None :
+    websocket_service.on_connect(EnrollRequest.from_dict(auth))
     
 @socketio.on(TOPIC_DISCONNECT)
 def disconnect_handler(reason) -> None :
-    websocketService.on_disconnect(reason)
+    websocket_service.on_disconnect(reason)
 
 
 
@@ -53,24 +54,19 @@ def disconnect_handler(reason) -> None :
 
 @socketio.on(TOPIC_CLIENT_DISCONNECTING)
 def client_disconnect_handler(data) -> None :
-    websocketService.on_client_disconnect(data)
-
-@socketio.on('display')
-def handle_message(msg) -> None :
-    print('Message: ' + msg)
-    send(msg, broadcast=True)
+    websocket_service.on_client_disconnect(data)
 
 @socketio.on(TOPIC_SCREEN_CALIBRATION)
 def handle_calibration(event : CalibrationEvent) -> None :
     logger.debug(f'[Event: screen/calibration] Incoming message {event}')
-    websocketService.broadcast_on_room(TOPIC_SCREEN_CALIBRATION, event)
+    websocket_service.broadcast_on_room(TOPIC_SCREEN_CALIBRATION, event)
 
 @socketio.on(TOPIC_MOUSE_MOVE)
 def handle_position(event : DrawerEvent) -> None :
     logger.debug(f'[Event: mouse/move] Incoming message {event}')
-    websocketService.broadcast_on_room(TOPIC_MOUSE_MOVE, event)
+    websocket_service.broadcast_on_room(TOPIC_MOUSE_MOVE, event)
 
 @socketio.on(TOPIC_MOUSE_CLICK)
 def handle_calibration(event : MouseClickEvent) -> None :
     logger.debug(f'[Event: mouse/click] Incoming message {event}')
-    websocketService.broadcast_on_room(TOPIC_MOUSE_CLICK, event)
+    websocket_service.broadcast_on_room(TOPIC_MOUSE_CLICK, event)
