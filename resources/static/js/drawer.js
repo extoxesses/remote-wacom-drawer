@@ -1,44 +1,76 @@
-function startDrawer(drawerButton = 1, eraserButton = 2) {
+function startDrawer(drawerButton = 'primary', eraserButton = 'secondary') {
     // Per documentazione: https://socket.io/docs/v4/client-api/
 
+    // Look for 'x-api-key' in the cookies
     const authToken = document.cookie.split(';')
             .find(str => str.includes('x-api-key'))
             ?.split('=')[1]
-            .substring(2).replace('\'','');
+            .substring(2)
+            .replace('\'','');
     if (!authToken) {
         alert('Unexpected error during drawer creation: try to refresh the page');
         return;
     }
     
+    // Now generate 'auth' object using:
+    // - 'api-key' from the cookie
+    // - 'api-secret' from the localStorage (if present) or generate a random value
+    // Update the localStorage with the new 'api-secret'
     const apis = atob(authToken).split(':')
     const storage = JSON.parse(localStorage.getItem(SESSION_USER_KEY));
     const secret = (storage && apis[0] === storage['api-key']) ? storage['api-secret'] : (Math.random()*1e32).toString(36).substring(0,8);
-    localStorage.setItem(SESSION_USER_KEY, JSON.stringify({
+    const auth = {
         'api-key': apis[0],
         'api-secret': secret,
         role: 'drawer'
-    }));
+    }
+    localStorage.setItem(SESSION_USER_KEY, JSON.stringify(auth));
     
-    const socket = setSharedConfigurations();
-    configDrawerSocket(socket)
-    configDrawer(socket, drawerButton, eraserButton);
+    // Configure drawer page (A)
+    configDrawer(auth, drawerButton, eraserButton);
 }
 
-function configDrawer(socket, drawerButton, eraserButton) {
+function configDrawer(auth, drawerButton, eraserButton) {
+    const socket = connectToServer(auth)
+    //setSharedConfigurations(configDrawer(auth, drawerButton, eraserButton));
+    setSharedConfigurations();
+
     const canvas = document.getElementById('drawingCanvas');
     const context = canvas.getContext('2d');
 
     // First, send "drawing area" size to calibrare the client receiver
-    console.log("Sending screen calibration event");
-    socket.emit(CALIBRATION_TOPIC, screenCalibrationEvent(canvas));
+    canvasCalibration(socket, canvas)
 
     const sessionData = JSON.parse(localStorage.getItem(SESSION_USER_KEY));
     document.getElementById('drawerId').textContent = sessionData['api-key'];
     document.getElementById('drawerSecret').textContent = sessionData['api-secret'];
 
+    window.onbeforeunload = () => {
+        socket.emit(CLIENT_DISCONNECTING_TOPIC, {
+            'client': localStorage.getItem(SESSION_USER_KEY)['api-key'],
+        });
+        localStorage.clear();
+    }
+
     canvas.addEventListener('contextmenu', event => {
         event.preventDefault();
     });
+
+    // Sidebar button events management
+    
+    document.getElementById('calibrateButton').addEventListener('click', () => canvasCalibration(socket, canvas));
+
+    document.getElementById('cleanButton').addEventListener('click', () => {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        socket.emit('clear', sessionData['api-key']);
+    });
+
+    document.getElementById('blackboardModeSwitch').addEventListener('change', () => {
+        // TODO: Send event to server to manager status for drawer
+        context.clearRect(0, 0, canvas.width, canvas.height);
+    }); 
+
+    // Canvas drawing events management
 
     canvas.addEventListener('mousedown', event => {
         mouseDownListener(event, context, socket, drawerButton, eraserButton);
@@ -64,32 +96,16 @@ function configDrawer(socket, drawerButton, eraserButton) {
         mouseMoveListener(socket, canvas, context, remapTouchEvent(canvas, event), drawerButton, eraserButton);
     });
 
-    document.getElementById('cleanButton').addEventListener('click', () => {
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        socket.emit('clear', sessionData['api-key']);
-    });
-
-    document.getElementById('blackboardModeSwitch').addEventListener('change', () => {
-        context.clearRect(0, 0, canvas.width, canvas.height);
-    }); 
-
-}
-
-function configDrawerSocket(socket) {
-
-    window.onbeforeunload = () => {
-        // TODO: questa potrebbe essere una banale api rest: non ho bisogno di comunicazione bidirezionale tra client e server
-        //    ma forse ha senso tenere il ws per notificare i "viewer" che il server è stato disconnesso
-        socket.emit(CLIENT_DISCONNECTING_TOPIC, {
-            'client': localStorage.getItem(SESSION_USER_KEY)['api-key'],
-        });
-        localStorage.clear();
-    }
-
 }
 
 
 // --- Listener functions ---
+
+function canvasCalibration(socket, canvas) {
+    // First, send "drawing area" size to calibrare the client receiver
+    console.log("Sending screen calibration event");
+    socket.emit(CALIBRATION_TOPIC, screenCalibrationEvent(canvas));
+}
 
 /**
  * Implementation to manage the "mouse move" event, both for mouse and touch events.

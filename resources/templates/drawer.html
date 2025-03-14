@@ -4,10 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Remote wacom drawer</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.js"></script>
-    <script src="/static/js/utils.js"></script>
-    <script src="/static/js/drawer.js"></script>
+    
+    <link rel="shortcut icon" href="{{url_for('static', filename='favicon.ico')}}">
     <link rel="stylesheet" href="/static/css/base.css">
+
+    <!-- TODO: Add integrity -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.js"></script>
+    <script src="/static/js/canvas_utils.js"></script>
+    <script src="/static/js/websocket_utils.js"></script>
+    <script src="/static/js/drawer.js"></script>
 </head>
 <body>
     <div id="container">
@@ -15,9 +20,9 @@
         <div id="sidebar">
             <h1>Remote Drawer</h1>
             <hr/>
-            <div>
+            <div id="credentials">
                 <div>
-                    <label for="drawerId">Drawer Id:</label>
+                    <label for="drawerId">Id:</label>
                     <label id="drawerId"></label>
                 </div>
                 <div>
@@ -26,7 +31,7 @@
                 </div>
             </div>
             <hr/>
-            <div>
+            <div id="controls">
                 <button id="connectButton">
                     <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />

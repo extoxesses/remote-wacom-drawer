@@ -2,23 +2,64 @@
 <html>
 <head>
     <title>Viewer</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.js"></script>
-    <script src="/static/js/utils.js"></script>
-    <script src="/static/js/viewer.js"></script>
+    <link rel="shortcut icon" href="{{url_for('static', filename='favicon.ico')}}">
     <link rel="stylesheet" href="/static/css/base.css">
+    <!-- TODO: centralizzare questa cosa a livello flask, per semplificare l'aggiornamento -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.js"></script>
+    <script src="/static/js/canvas_utils.js"></script>
+    <script src="/static/js/websocket_utils.js"></script>
+    <script src="/static/js/viewer.js"></script>
 </head>
 <body>
-    <h1>Viewer</h1>
-    <canvas id="displayCanvas" width="800" height="600"></canvas>
+    <!-- <h1>Viewer</h1>
+    <canvas id="displayCanvas" width="800" height="600"></canvas> -->
+
+    <div id="container">
+        <!-- Sidebar -->
+        <div id="sidebar">
+            <h1>Remote Drawer</h1>
+            <hr/>
+            <div id="credentials">
+                <div>
+                    <label for="drawerId">Id:</label>
+                    <label id="drawerId"></label>
+                </div>
+                <div>
+                    <label for="drawerSecret">Secret:</label>
+                    <label id="drawerSecret"></label>
+                </div>
+            </div>
+            <hr/>
+            <div id="controls">
+                <button id="connectButton">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Reconnect
+                </button>
+            </div>
+        </div>
+
+        <!-- Canvas Container -->
+        <div id="drawingCanvasContainer">
+            <canvas id="drawingCanvas"></canvas>
+        </div>
+    </div>
+
     <script>
-        socket = io("ws://{{ip}}:{{port}}", {
-            reconnectionDelayMax: 10000,
-            auth: {
-                token: '1234'
-            }
-        });
-        configSocket(socket);
-        configViewer(socket, {{drawer_button}});
+        // socket = io("ws://{{ip}}:{{port}}", {
+        //     reconnectionDelayMax: 10000,
+        //     auth: {
+        //         token: '1234'
+        //     }
+        // });
+        socket = conectToServer({
+            'api-key': '995683992285',
+            'api-secret': '54n8nb6l',
+            role: 'drawer'
+        })
+        setSharedConfigurations()
+        configViewer(socket, '{{drawer_button}}', '{{eraser_button}}');
     </script>
 </body>
 </html>

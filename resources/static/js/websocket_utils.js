@@ -1,23 +1,11 @@
 const SESSION_USER_KEY = 'authorization';
 
-function connectToServer() {
+function connectToServer(auth) {
     let serviceUrl = window.location.host;
-    return io(`ws://${serviceUrl}`, {
+    const socket = io(`ws://${serviceUrl}`, {
         reconnectionDelayMax: 5000,
-        auth: JSON.parse(localStorage.getItem(SESSION_USER_KEY))
+        auth
     });
-}
-
-/**
- * This method is shared between the drawer and the viewer, and allows to set the common environment
- * of the two applications.
- *  
- * @param {*} socket WebSocket client
- */
-function setSharedConfigurations() {
-
-    let socket = connectToServer();
-    resizeCanvas();
 
     socket.on('connect', () => {
         alert('Connected to server')
@@ -27,53 +15,26 @@ function setSharedConfigurations() {
         alert('Disconnected from server')
     });
 
+    return socket
+}
+
+/**
+ * This method is shared between the drawer and the viewer, and allows to set the common environment
+ * of the two applications.
+ *  
+ * @param {*} socket WebSocket client
+ */
+function setSharedConfigurations(f) {
+    resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    // window.addEventListener('resize', () => {
-    //     const container = document.getElementById('drawingCanvasContainer');
-    //     canvas.width = container.clientWidth;
-    //     canvas.height = container.clientHeight;
-    // });
-
     // Add event listeners for buttons
+    // TODO: Capire se ha senso ho no questa cosa, o se non debba riconfigurare tutto quello che è in (A)
     document.getElementById('connectButton').addEventListener('click', () => {
-        socket = connectToServer();
+        console.log('Click event')
+        // socket = f(); // connectToServer();
     });
 
-    // document.getElementById('calibrateButton').addEventListener('click', calibrationCallback);
-
-    return socket;
-
-}
-
-function drawOnCanvas(context, pressedButton, drawerFunction, drawerButton, eraserButton) {
-    // TODO: qua potrebbe essere interessante dare la possibilità di dare una palete di colori per la penna in modalità "lavagna"
-    if (pressedButton > 0) {
-        if (pressedButton === drawerButton) { // TODO: ridisegnare questa parte per utilizzare una logica simile a quella alla MOUSE_BUTTON
-            context.strokeStyle = 'black';
-        } else if (pressedButton === eraserButton) {
-            context.strokeStyle = 'white';
-        }
-        drawerFunction();
-    }
-}
-
-function drawLine(context, x, y) {
-    context.lineTo(x, y);
-    context.stroke();
-}
-
-function drawStartPoint(context, x, y) {
-    context.beginPath();
-    context.moveTo(x, y);
-}
-
-function getRelativeMousePosition(x, y, canvas) {
-    const rect = canvas.getBoundingClientRect();
-    return {
-        x: x * (canvas.width / rect.width),
-        y: y * (canvas.height / rect.height)
-    };
 }
 
 // -- Topics ---
