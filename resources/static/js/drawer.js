@@ -5,8 +5,6 @@ function startDrawer(drawerButton = 'primary', eraserButton = 'secondary') {
     const authToken = document.cookie.split(';')
             .find(str => str.includes('x-api-key'))
             ?.split('=')[1]
-            .substring(2)
-            .replace('\'','');
     if (!authToken) {
         alert('Unexpected error during drawer creation: try to refresh the page');
         return;

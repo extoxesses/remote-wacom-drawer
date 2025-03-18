@@ -11,9 +11,6 @@
     <script src="/static/js/viewer.js"></script>
 </head>
 <body>
-    <!-- <h1>Viewer</h1>
-    <canvas id="displayCanvas" width="800" height="600"></canvas> -->
-
     <div id="container">
         <!-- Sidebar -->
         <div id="sidebar">
@@ -22,11 +19,11 @@
             <div id="credentials">
                 <div>
                     <label for="drawerId">Id:</label>
-                    <label id="drawerId"></label>
+                    <input type="text" id="drawerId" placeholder="Enter drawer ID">
                 </div>
                 <div>
                     <label for="drawerSecret">Secret:</label>
-                    <label id="drawerSecret"></label>
+                    <input type="text" id="drawerSecret" placeholder="Enter drawer secret">
                 </div>
             </div>
             <hr/>
@@ -47,19 +44,7 @@
     </div>
 
     <script>
-        // socket = io("ws://{{ip}}:{{port}}", {
-        //     reconnectionDelayMax: 10000,
-        //     auth: {
-        //         token: '1234'
-        //     }
-        // });
-        socket = conectToServer({
-            'api-key': '995683992285',
-            'api-secret': '54n8nb6l',
-            role: 'drawer'
-        })
-        setSharedConfigurations()
-        configViewer(socket, '{{drawer_button}}', '{{eraser_button}}');
+        startViewer('{{drawer_button}}', '{{eraser_button}}')
     </script>
 </body>
 </html>

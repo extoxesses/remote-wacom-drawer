@@ -17,4 +17,5 @@ class SessionService :
         else:
             session['api-key'] = drawer_id
         
-        return base64.b64encode(bytes(drawer_id, 'utf-8'))
+        # "decode()" statement is required to convert the byte-array to string (and remove the `b'...'` wrapper)
+        return base64.b64encode(bytes(drawer_id, 'utf-8')).decode('utf-8')

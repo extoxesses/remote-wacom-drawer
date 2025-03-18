@@ -30,10 +30,10 @@ function setSharedConfigurations(f) {
 
     // Add event listeners for buttons
     // TODO: Capire se ha senso ho no questa cosa, o se non debba riconfigurare tutto quello che è in (A)
-    document.getElementById('connectButton').addEventListener('click', () => {
-        console.log('Click event')
-        // socket = f(); // connectToServer();
-    });
+    //document.getElementById('connectButton').addEventListener('click', () => {
+    //    console.log('Click event')
+    //    // socket = f(); // connectToServer();
+    //});
 
 }
 
