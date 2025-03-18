@@ -40,6 +40,8 @@ function setSharedConfigurations(f) {
 // -- Topics ---
 
 const CALIBRATION_TOPIC = 'screen/calibration';
+const CHANGE_MODE_TOPIC = 'action/change_mode'
+const CLEAN_BOARD_TOPIC = 'action/clean'
 const CLIENT_DISCONNECTING_TOPIC = 'client_disconnectisng';
 const MOUSE_CLICK_TOPIC = 'mouse/click';
 const MOUSE_MOVE_TOPIC = 'mouse/move';

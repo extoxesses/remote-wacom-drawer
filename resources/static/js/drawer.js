@@ -60,7 +60,7 @@ function configDrawer(auth, drawerButton, eraserButton) {
 
     document.getElementById('cleanButton').addEventListener('click', () => {
         context.clearRect(0, 0, canvas.width, canvas.height);
-        socket.emit('clear', sessionData['api-key']);
+        socket.emit(CLEAN_BOARD_TOPIC, sessionData['api-key']);
     });
 
     document.getElementById('blackboardModeSwitch').addEventListener('change', () => {

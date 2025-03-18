@@ -24,8 +24,8 @@ function drawStartPoint(context, x, y) {
     context.moveTo(x, y);
 }
 
-function getRelativeMousePosition(x, y, canvas) {
-    const rect = canvas.getBoundingClientRect();
+function getRelativeMousePosition(x, y, canvas, base) {
+    const rect = base ? base : canvas.getBoundingClientRect();
     return {
         x: x * (canvas.width / rect.width),
         y: y * (canvas.height / rect.height)

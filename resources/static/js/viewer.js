@@ -1,8 +1,17 @@
 function startViewer(drawerButton = 'primary', eraserButton = 'secondary') {
 
-    let socket;
     const canvas = document.getElementById('drawingCanvas');
-
+    const context = canvas.getContext('2d');
+    let buttonStatus = {
+        button: 0,
+        isStart: false
+    };
+    let drawerCanvasSize = {
+        width: canvas.width,
+        height: canvas.height
+    };
+    let socket;
+    
     document.getElementById('connectButton').addEventListener('click', () => {
         const drawerId = document.getElementById('drawerId').value;
         const drawerSecret = document.getElementById('drawerSecret').value;
@@ -27,44 +36,70 @@ function startViewer(drawerButton = 'primary', eraserButton = 'secondary') {
         
         setSharedConfigurations();
 
-        socket.on('mouse/move', (position) => {
-            console.log(position)
-            drawCanvas(canvas, position, drawerButton, eraserButton);
+        socket.on(MOUSE_MOVE_TOPIC, (event) => {
+            const relativePosition = getRelativeMousePosition(event.point.x, event.point.y, canvas, drawerCanvasSize);
+
+            if (buttonStatus.button === 0) {
+                return;
+            
+            } else if (buttonStatus.isStart) {
+                console.log(`Drawing event to canvas. Button: ${buttonStatus.button}, Status: ${buttonStatus.isStart}, Point: ${JSON.stringify(relativePosition)}`)
+                drawOnCanvas(context, buttonStatus.button, () => drawStartPoint(context, relativePosition.x, relativePosition.y),
+                                drawerButton, eraserButton);
+                buttonStatus.isStart = false;
+            
+            } else {
+                console.log(`Drawing event to canvas. Button: ${buttonStatus.button}, Status: ${buttonStatus.isStart}, Point: ${JSON.stringify(relativePosition)}`)
+                drawOnCanvas(context, buttonStatus.button, () => drawLine(context, relativePosition.x, relativePosition.y),
+                                drawerButton, eraserButton);
+            }
         });
+
+        socket.on(MOUSE_CLICK_TOPIC, (event) => {
+            let ops = event.event
+            switch (ops) {
+                case 'mousedown':
+                case 'touchstart':
+                    buttonStatus = { button: labelToButton(event.button), isStart: true }
+                    break;
+                case 'mouseup':
+                case 'touchend':
+                    buttonStatus = { button: 0, isStart: false };
+                    break;
+                default:
+                    console.log(`Event ${ops} not recognized. Skipped`)
+                    break;
+            }
+        })
+
+        socket.on(CALIBRATION_TOPIC, (event) => {
+            console.log(`Drawer resing: update source drawing panel size to ${JSON.stringify(event.screen_size)}`);
+            drawerCanvasSize = {
+                width: event.screen_size.width,
+                height: event.screen_size.height
+            }
+        })
+
+        socket.on(CLEAN_BOARD_TOPIC, (event) => {
+            console.log('clean')
+            context.clearRect(0, 0, canvas.width, canvas.height);
+        })
+
+        // TODO: Add drawer disconnection management on both side (py amd js)
+
     });
 
 }
 
-// function configViewer(socket, drawerButton = 1, eraserButton = 2) {
-    
-//     document.addEventListener('DOMContentLoaded', () => {
-//         canvas = document.getElementById('displayCanvas');
-//         configViewerSocket(socket, canvas, drawerButton, eraserButton)
-//     });
-
-// }
-
-
-// -- "Private" functions
-
-// function configViewerSocket(socket, canvas, drawerButton, eraserButton) {
-
-//     socket.on('position', (position) => {
-//         drawCanvas(canvas, position, drawerButton, eraserButton);
-//     });
-
-// }
-
-function drawCanvas(canvas, event, drawerButton, eraserButton) {
-    let context = canvas.getContext('2d');
-    let relativePosition = getRelativeMousePosition(event.position.x, event.position.y, canvas)
-    let pressedButton = event.position.button;
-
-    if (event.isStart) {
-        drawOnCanvas(context, pressedButton, () => drawStartPoint(context, relativePosition.offsetX, relativePosition.offsetY),
-                        drawerButton, eraserButton);
-    } else {
-        drawOnCanvas(context, pressedButton, () => drawLine(context, relativePosition.offsetX, relativePosition.offsetY),
-                        drawerButton, eraserButton);
+function labelToButton(button) {
+    switch (button) {
+        case 'primary':
+            return 1;
+        case 'secondary':
+            return 2;
+        case 'middle':
+            return 3;
+        default:
+            return undefined;
     }
 }
