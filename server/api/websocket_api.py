@@ -28,8 +28,9 @@ def client_disconnect_handler(data) -> None :
     websocket_service.on_client_disconnect(data)
 
 @socketio.on(TOPIC_SCREEN_CALIBRATION)
-def handle_calibration(event : CalibrationEvent) -> None :
+def handle_calibration(event: CalibrationEvent) -> None:
     logger.debug(f'[Event: {TOPIC_SCREEN_CALIBRATION}] Incoming message {event}')
+    websocket_service.update_drawer_screen_size(CalibrationEvent.from_dict(event))
     websocket_service.broadcast_on_room(TOPIC_SCREEN_CALIBRATION, event)
 
 @socketio.on(TOPIC_MOUSE_MOVE)
@@ -38,9 +39,10 @@ def handle_position(event : DrawerEvent) -> None :
     websocket_service.broadcast_on_room(TOPIC_MOUSE_MOVE, event)
 
 @socketio.on(TOPIC_MOUSE_CLICK)
-def handle_calibration(event : MouseClickEvent) -> None :
+def handle_mouse_click(event: MouseClickEvent) -> None:
     logger.debug(f'[Event: {TOPIC_MOUSE_CLICK}] Incoming message {event}')
     websocket_service.broadcast_on_room(TOPIC_MOUSE_CLICK, event)
+
 
 @socketio.on(TOPIC_ACTION_CLEAN)
 def handle_clean_action(event : str) -> None :

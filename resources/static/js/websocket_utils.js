@@ -8,11 +8,11 @@ function connectToServer(auth) {
     });
 
     socket.on('connect', () => {
-        alert('Connected to server')
+        alert('Connected to server');
     });
 
     socket.on('disconnect', () => {
-        alert('Disconnected from server')
+        alert('Disconnected from server');
     });
 
     return socket
