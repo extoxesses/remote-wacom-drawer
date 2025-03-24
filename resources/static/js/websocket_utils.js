@@ -144,10 +144,19 @@ function remapTouchEvent(canvas, event) {
 function resizeCanvas() {
     const canvas = document.getElementById('drawingCanvas');
     const container = document.getElementById('drawingCanvasContainer');
-    
+
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = canvas.width;
+    tempCanvas.height = canvas.height;
+    const tempContext = tempCanvas.getContext('2d');
+    tempContext.drawImage(canvas, 0, 0);
+
     // Added padding management to avoid canvas overflow
     let padding = window.getComputedStyle(container).getPropertyValue('padding').replace('px', '');
 
     canvas.width = container.clientWidth - 2 * padding;
     canvas.height = container.clientHeight - 2 * padding;
+
+    const context = canvas.getContext('2d');
+    context.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height, 0, 0, canvas.width, canvas.height);
 }
