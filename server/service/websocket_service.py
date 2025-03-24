@@ -1,6 +1,6 @@
 import json
 from flask import request
-from flask_socketio import emit, join_room
+from flask_socketio import disconnect, emit, join_room
 
 from server import logging, redis_connection, server_config, socketio
 from server.config.redis_fields import *
@@ -72,33 +72,35 @@ def enroll_viewer(connection_request: EnrollRequest) -> None:
             timeout=5.0
         )
         if not auth_response or auth_response.get('apiSecret', None) is None:
-            raise ValueError('Viewer authentication rejected by drawer')
+            manage_viewer_error('Viewer authentication rejected by drawer')
         elif auth_response.get('apiSecret', None) != connection_request.api_secret:
-            raise ValueError('Invalid api-secret provided!')
-
-        # Get current screen size and viewer list
-        screen_size_data = redis_connection.hget(room_id, REDIS_DRAWER_SCREEN_SIZE)
-        screen_size = json.loads(screen_size_data) if screen_size_data else {}
-        
+            manage_viewer_error('Invalid api-secret provided!')
+                
         viewers_data = redis_connection.hget(room_id, REDIS_VIEWERS_SIDS)
         viewers = json.loads(viewers_data.decode("utf-8")) if viewers_data else []
-        
-        # Add new viewer
         viewers.append(request.sid)
         redis_connection.hset(room_id, mapping={REDIS_VIEWERS_SIDS: json.dumps(viewers)})
         
         # Send screen calibration if available
+        screen_size_data = redis_connection.hget(room_id, REDIS_DRAWER_SCREEN_SIZE)
+        screen_size = json.loads(screen_size_data) if screen_size_data else {}
         if screen_size:
             emit(TOPIC_SCREEN_CALIBRATION, {'screen_size': screen_size}, to=request.sid)
             
     except (json.JSONDecodeError, AttributeError) as e:
-        logger.error(f'Error processing room data: {e}')
-        raise ValueError('Invalid room data format')
+        manage_viewer_error(f'Error processing room data: {e}')
     except TimeoutError:
-        logger.error('Authentication request timed out')
-        raise ValueError('Authentication request timed out')
+        manage_viewer_error('Authentication request timed out')
     except Exception as e:
-        logger.error(f'Errore generico: {e}')
+        manage_viewer_error(f'Errore generico: {e}', e)
+
+def manage_viewer_error(log: str, exception: Exception) :
+    logger.error(log)
+    disconnect()
+    if (not exception):
+        raise ValueError(log)
+    raise exception
+    
 
 
 __all__ = [
