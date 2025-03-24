@@ -12,9 +12,29 @@ logger = logging.getLogger(__name__)
 ###########################
 
 @socketio.on(TOPIC_CONNECT)
-def connect_handler(auth : EnrollRequest) -> None :
-    websocket_service.on_connect(EnrollRequest.from_dict(auth))
+def connect_handler(auth: EnrollRequest) -> None:
+    """Handle WebSocket connection request with authentication.
     
+    Args:
+        auth (EnrollRequest): Authentication data from client
+        
+    Returns:
+        None. May emit error events to client on failure.
+    """
+    try:
+        validated_request = EnrollRequest.model_validate(auth)
+        websocket_service.on_connect(validated_request)
+    except ValueError as ve:
+        error_msg = f"Invalid enrollment request: {str(ve)}"
+        logger.error(error_msg)
+        socketio.emit('error', {'code': 400, 'message': error_msg})
+        return
+    except Exception as e:
+        error_msg = f"Connection error: {str(e)}"
+        logger.error(error_msg, exc_info=True)
+        socketio.emit('error', {'code': 500, 'message': 'Internal server error'})
+        return
+
 @socketio.on(TOPIC_DISCONNECT)
 def disconnect_handler(reason) -> None :
     websocket_service.on_disconnect(reason)
@@ -30,7 +50,7 @@ def client_disconnect_handler(data) -> None :
 @socketio.on(TOPIC_SCREEN_CALIBRATION)
 def handle_calibration(event: CalibrationEvent) -> None:
     logger.debug(f'[Event: {TOPIC_SCREEN_CALIBRATION}] Incoming message {event}')
-    websocket_service.update_drawer_screen_size(CalibrationEvent.from_dict(event))
+    websocket_service.update_drawer_screen_size(CalibrationEvent.model_validate(event))
     websocket_service.broadcast_on_room(TOPIC_SCREEN_CALIBRATION, event)
 
 @socketio.on(TOPIC_MOUSE_MOVE)

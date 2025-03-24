@@ -1,26 +1,20 @@
 from enum import Enum
-from dataclasses import dataclass
-from commons import BaseModel
+from pydantic import BaseModel
 
 class EnrollRole(Enum):
     DRAWER = 'drawer'
     VIEWER = 'viewer'
     EMULATOR = 'emulator'
 
-@dataclass
-class EnrollRequest :
+class EnrollRequest(BaseModel):
     api_key: str
     api_secret: str
     role: EnrollRole
 
-    @classmethod
-    def from_dict(cls, data : dict) -> 'EnrollRequest':
-        return cls(data['api-key'], data['api-secret'], data['role'])
+    # If you need to maintain the same field names as in the original
+    class Config:
+        alias_generator = lambda x: x.replace('_', '-')
+        allow_population_by_field_name = True
 
-@dataclass
 class EnrollResponse(BaseModel):
     session_id: str
-
-    @classmethod
-    def from_dict(cls, data : dict) -> 'EnrollResponse':
-        return cls(**data)

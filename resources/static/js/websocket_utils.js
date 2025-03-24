@@ -7,12 +7,17 @@ function connectToServer(auth) {
         auth
     });
 
-    socket.on('connect', () => {
+    socket.on('connect', (e) => {
         alert('Connected to server');
     });
 
     socket.on('disconnect', () => {
         alert('Disconnected from server');
+    });
+
+    // TODO: da capire come ottimizzare questa funzionalità, e inibire la connessione in caso di errore
+    socket.on('error', (e) => {
+        alert(`Error thrown during connection initialization: ${JSON.stringify(e)}`)
     });
 
     return socket

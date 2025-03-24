@@ -5,6 +5,8 @@ Settings module for Server application.
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# TODO: generare .env di esempio completo con tutti i parametri
+
 class AppConfiguration(BaseSettings):
     drawer_button: str = Field('primary', alias='APP_DRAWER_BTN')
     eraser_button: str = Field('secondary', alias='APP_ERASER_BTN')
@@ -27,6 +29,7 @@ class LoggingConfiguration(BaseSettings):
 class RedisConfiguration(BaseSettings) :
     host: str = Field(alias="REDIS_HOST")
     port: int = Field(6379, alias="REDIS_PORT")
+    expiration_time: int = Field(3600000, alias="REDIS_EXPIRATION_TIME") # in millis
     model_config = SettingsConfigDict(
         env_file='.env',
         case_sensitive=True,

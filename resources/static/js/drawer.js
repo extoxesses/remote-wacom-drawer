@@ -30,7 +30,6 @@ function startDrawer(drawerButton = 'primary', eraserButton = 'secondary') {
 
 function configDrawer(auth, drawerButton, eraserButton) {
     const socket = connectToServer(auth)
-    //setSharedConfigurations(configDrawer(auth, drawerButton, eraserButton));
     setSharedConfigurations();
 
     const canvas = document.getElementById('drawingCanvas');
@@ -94,8 +93,11 @@ function configDrawer(auth, drawerButton, eraserButton) {
         mouseMoveListener(socket, canvas, context, remapTouchEvent(canvas, event), drawerButton, eraserButton);
     });
 
+    socket.on('room/authenticate', (e, callback) => {
+        const secret = document.getElementById('drawerSecret').textContent;
+        callback({ apiSecret: secret });
+    })
 }
-
 
 // --- Listener functions ---
 

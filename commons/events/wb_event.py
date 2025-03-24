@@ -1,25 +1,15 @@
 from enum import Enum
-import datetime
-from dataclasses import dataclass
+from datetime import datetime
+from pydantic import BaseModel
 
-@dataclass
-class PointEvent :
-    x : int
-    y : int
+class PointEvent(BaseModel):
+    x: int
+    y: int
 
-    @classmethod
-    def from_dict(cls, data : dict) -> 'PointEvent':
-        return cls(**data)
-
-@dataclass
-class DrawerEvent :    
-    client : str
-    point : PointEvent
-    timestamp : datetime
-
-    @classmethod
-    def from_dict(cls, data : dict) -> 'DrawerEvent':
-        return cls(data['client'], PointEvent.from_dict(data['point']), data['timestamp'])
+class DrawerEvent(BaseModel):
+    client: str
+    point: PointEvent
+    timestamp: datetime
 
 class MouseClickEventType(Enum):
     MOUSE_DOWN = 'mousedown'
@@ -32,13 +22,8 @@ class MouseClickButtonType(Enum):
     AUXILIARY = 'middle'
     SECONDARY = 'secondary'
 
-@dataclass
-class MouseClickEvent :
+class MouseClickEvent(BaseModel):
     event: MouseClickEventType
     button: MouseClickButtonType
     client: str
     timestamp: datetime
-
-    @classmethod
-    def from_dict(cls, data : dict) -> 'MouseClickEvent':
-        return cls(**data)

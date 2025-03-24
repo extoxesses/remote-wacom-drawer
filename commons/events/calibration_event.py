@@ -1,21 +1,11 @@
 import datetime
-from dataclasses import dataclass
+from pydantic import BaseModel
 
-@dataclass
-class ScreenSize :
-    width : int
-    height : int
-        
-    @classmethod
-    def from_dict(cls, data : dict) -> 'ScreenSize':
-        return cls(**data)
+class ScreenSize(BaseModel):
+    width: int
+    height: int
 
-@dataclass
-class CalibrationEvent :
-    screen_size : ScreenSize
-    client : str
-    timestamp : datetime
-        
-    @classmethod
-    def from_dict(cls, data : dict) -> 'CalibrationEvent':
-        return cls(ScreenSize.from_dict(data['screen_size']), data['client'], data['timestamp'])
+class CalibrationEvent(BaseModel):
+    screen_size: ScreenSize
+    client: str
+    timestamp: datetime.datetime

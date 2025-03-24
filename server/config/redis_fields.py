@@ -1,0 +1,9 @@
+REDIS_DRAWER_SID = 'drawer'
+REDIS_VIEWERS_SIDS = 'viewers'
+REDIS_DRAWER_SCREEN_SIZE = 'screen_size'
+
+__all__ = [
+    'REDIS_DRAWER_SID',
+    'REDIS_VIEWERS_SIDS',
+    'REDIS_DRAWER_SCREEN_SIZE'
+]
